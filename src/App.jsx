@@ -1,11 +1,26 @@
 import { useEffect, useReducer, useState } from "react";
 
+import Header from "./components/Header";
+import SearchBar from "./components/SearchBar";
+import Favourites from "./components/Favourites";
+import Gallery from "./components/Gallery";
+import EmptyState from "./components/EmptyState";
+
 const API_URL = "https://picsum.photos/v2/list?limit=30";
+
+const STORAGE_KEY = "celebrare-favourites";
 
 function getSavedFavourites() {
   try {
-    const saved = localStorage.getItem("celebrare-favourites");
-    return saved ? JSON.parse(saved) : [];
+    const saved = localStorage.getItem(STORAGE_KEY);
+
+    if (!saved) {
+      return [];
+    }
+
+    const parsed = JSON.parse(saved);
+
+    return Array.isArray(parsed) ? parsed : [];
   } catch {
     return [];
   }
@@ -15,7 +30,9 @@ function favouritesReducer(state, action) {
   switch (action.type) {
     case "TOGGLE_FAVOURITE": {
       const photo = action.payload;
+
       const alreadyFavourite = state.some((item) => item.id === photo.id);
+
       if (alreadyFavourite) {
         return state.filter((item) => item.id !== photo.id);
       }
@@ -33,6 +50,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
+  const [showFavourites, setShowFavourites] = useState(false);
 
   const [favourites, dispatch] = useReducer(
     favouritesReducer,
@@ -40,13 +58,12 @@ function App() {
     getSavedFavourites,
   );
 
-  const [showFavourites, setShowFavourites] = useState(false);
-
   useEffect(() => {
     async function fetchPhotos() {
       try {
         setLoading(true);
         setError("");
+
         const response = await fetch(API_URL);
 
         if (!response.ok) {
@@ -66,7 +83,11 @@ function App() {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem("celebrare-favourites", JSON.stringify(favourites));
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(favourites));
+    } catch {
+      console.error("Unable to save favourites.");
+    }
   }, [favourites]);
 
   function toggleFavourite(photo) {
@@ -76,129 +97,82 @@ function App() {
     });
   }
 
-  const displayedPhotos = (showFavourites ? favourites : photos).filter(
-    (photo) => photo.author.toLowerCase().includes(search.toLowerCase()),
+  const photosToDisplay = showFavourites ? favourites : photos;
+
+  const filteredPhotos = photosToDisplay.filter((photo) =>
+    photo.author.toLowerCase().includes(search.trim().toLowerCase()),
   );
 
   if (loading) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4">
-        {" "}
-        <div className="h-12 w-12 animate-spin rounded-full border-4 border-gray-200 border-t-blue-600" />{" "}
-        <p className="text-gray-600">Loading photos...</p>{" "}
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-gray-50">
+        <div className="h-12 w-12 animate-spin rounded-full border-4 border-gray-200 border-t-blue-600" />
+
+        <p className="text-sm text-gray-500">Loading beautiful photos...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4">
-        {" "}
-        <p className="text-lg text-red-600">{error}</p>
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 px-4 text-center">
+        <p className="text-red-600">{error}</p>
+
         <button
+          type="button"
           onClick={() => window.location.reload()}
-          className="rounded-lg bg-blue-600 px-5 py-2 text-white hover:bg-blue-700"
+          className="rounded-xl bg-blue-600 px-5 py-3 text-white hover:bg-blue-700"
         >
-          Try Again{" "}
-        </button>{" "}
+          Try Again
+        </button>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-gray-50 px-4 py-8 sm:px-6 lg:px-10">
-      {" "}
-      <header className="mx-auto mb-8 max-w-7xl">
-        {" "}
-        <h1 className="text-3xl font-bold text-gray-900 sm:text-4xl">
-          Celebrare Photo Gallery{" "}
-        </h1>
-        <p className="mt-2 text-gray-600">
-          Discover beautiful photos from talented photographers.
-        </p>
-        <div className="mt-6 flex flex-col gap-4 sm:flex-row">
-          <input
-            type="text"
-            placeholder="Search by author..."
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 outline-none focus:border-blue-500 sm:max-w-md"
-          />
+      <div className="mx-auto max-w-7xl">
+        <Header />
 
-          <button
-            onClick={() => setShowFavourites(false)}
-            className={`rounded-lg px-5 py-3 font-medium ${
-              !showFavourites
-                ? "bg-blue-600 text-white"
-                : "bg-white text-gray-700 border border-gray-300"
-            }`}
-          >
-            All Photos
-          </button>
-
-          <button
-            onClick={() => setShowFavourites(true)}
-            className={`rounded-lg px-5 py-3 font-medium ${
-              showFavourites
-                ? "bg-blue-600 text-white"
-                : "bg-white text-gray-700 border border-gray-300"
-            }`}
-          >
-            ♥ Favourites ({favourites.length})
-          </button>
-        </div>
-      </header>
-      <main className="mx-auto max-w-7xl">
-        {displayedPhotos.length === 0 ? (
-          <p className="py-16 text-center text-gray-500">
-            {showFavourites && favourites.length === 0
-              ? "No favourites yet. Click the heart on a photo to add one!"
-              : "No photos found."}
-          </p>
-        ) : (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {displayedPhotos.map((photo) => {
-              const isFavourite = favourites.some(
-                (item) => item.id === photo.id,
-              );
-
-              return (
-                <article
-                  key={photo.id}
-                  className="overflow-hidden rounded-xl bg-white shadow-sm transition-shadow hover:shadow-lg"
-                >
-                  <img
-                    src={photo.download_url}
-                    alt={`Photo by ${photo.author}`}
-                    className="h-56 w-full object-cover"
-                    loading="lazy"
-                  />
-
-                  <div className="flex items-center justify-between p-4">
-                    <p className="font-medium text-gray-800">{photo.author}</p>
-
-                    <button
-                      type="button"
-                      onClick={() => toggleFavourite(photo)}
-                      aria-label={
-                        isFavourite
-                          ? `Remove ${photo.author} from favourites`
-                          : `Add ${photo.author} to favourites`
-                      }
-                      aria-pressed={isFavourite}
-                      className={`text-2xl transition-transform hover:scale-110 ${
-                        isFavourite ? "text-red-500" : "text-gray-400"
-                      }`}
-                    >
-                      {isFavourite ? "♥" : "♡"}
-                    </button>
-                  </div>
-                </article>
-              );
-            })}
+        <section className="mb-8 flex flex-col gap-4 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:p-5">
+          <div className="flex-1">
+            <SearchBar search={search} setSearch={setSearch} />
           </div>
-        )}
-      </main>
+
+          <Favourites
+            showFavourites={showFavourites}
+            setShowFavourites={setShowFavourites}
+            favouritesCount={favourites.length}
+          />
+        </section>
+
+        <main>
+          <div className="mb-5 flex items-center justify-between">
+            <h2 className="text-xl font-bold text-gray-800">
+              {showFavourites ? "Your Favourites" : "Explore Photos"}
+            </h2>
+
+            <span className="text-sm text-gray-500">
+              {filteredPhotos.length}{" "}
+              {filteredPhotos.length === 1 ? "photo" : "photos"}
+            </span>
+          </div>
+
+          {filteredPhotos.length === 0 ? (
+            <EmptyState showFavourites={showFavourites} search={search} />
+          ) : (
+            <Gallery
+              photos={filteredPhotos}
+              favourites={favourites}
+              onToggleFavourite={toggleFavourite}
+            />
+          )}
+        </main>
+
+        <footer className="mt-12 border-t border-gray-200 py-6 text-center text-sm text-gray-500">
+          Built with React and Tailwind CSS
+        </footer>
+      </div>
     </div>
   );
 }
