@@ -1,16 +1,99 @@
-# React + Vite
+# 📸 Celebrare Photo Gallery
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+A responsive photo gallery application built with React and Tailwind CSS. Browse beautiful photos, search by photographer name, and save your favourite photos for later.
 
-Currently, two official plugins are available:
+## 🌐 Live Demo
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+[View Celebrare Photo Gallery](https://celebrare-photo-gallery-peach.vercel.app/)
 
-## React Compiler
+## ✨ Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Photo Gallery:** Fetch and display photos from the Picsum Photos API.
+- **Search:** Search photos by photographer name.
+- **Favourites:** Add or remove photos using heart icons.
+- **Persistent Storage:** Favourites remain saved after refreshing the page using localStorage.
+- **Responsive Design:** Responsive layout for mobile, tablet, and desktop screens.
+- **Loading State:** Displays a loading indicator while photos are being fetched.
+- **Error Handling:** Displays an error message if photos cannot be loaded.
+- **Empty State:** Shows helpful messages when no matching photos or favourites are available.
 
-## Expanding the Oxlint configuration
+## 🛠️ Technologies Used
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+- React
+- JavaScript
+- Tailwind CSS
+- Vite
+- Lucide React
+- Picsum Photos API
+- Browser localStorage
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+Install [Node.js](https://nodejs.org/) and npm on your computer.
+
+### Installation
+
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/nadiya-code/celebrare-photo-gallery.git
+   ```
+
+2. Navigate to the project directory:
+
+   ```bash
+   cd celebrare-photo-gallery
+   ```
+
+3. Install dependencies:
+
+   ```bash
+   npm install
+   ```
+
+4. Start the development server:
+
+   ```bash
+   npm run dev
+   ```
+
+5. Open the local URL displayed in your terminal.
+
+## 📂 Project Structure
+
+```text
+src/
+├── components/
+│   ├── EmptyState.jsx
+│   ├── Favourites.jsx
+│   ├── Gallery.jsx
+│   ├── Header.jsx
+│   ├── PhotoCard.jsx
+│   └── SearchBar.jsx
+├── App.jsx
+├── index.css
+└── main.jsx
+```
+
+## 🧠 React Concepts Used
+
+- Functional components
+- Props for sharing data between components
+- `useState` for managing UI state
+- `useEffect` for fetching photos and synchronizing favourites with localStorage
+- `useReducer` for managing favourite actions
+- Array methods such as `map`, `filter`, and `some`
+- Conditional rendering
+- API integration using `fetch`
+
+## 👩‍💻 Author
+
+**Nadiya Kola**
+
+GitHub: [nadiya-code](https://github.com/nadiya-code)
+
+---
+
+Built with React and Tailwind CSS.
